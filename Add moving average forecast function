@@ -1,0 +1,9 @@
+def moving_average_forecast(self, data, n, k):
+    """Метод скользящей средней для прогноза (из методички стр. 3-4)"""
+    forecast = []
+    last = data.copy()
+    for _ in range(k):
+        avg = sum(last[-n:]) / n
+        forecast.append(avg)
+        last.append(avg)
+    return forecast
