@@ -1,0 +1,10 @@
+import tkinter as tk
+
+root = tk.Tk()
+root.title("Анализ данных - Лабораторная работа №3")
+root.geometry("900x600")
+
+label = tk.Label(root, text="Загрузите файл с данными", font=("Arial", 14))
+label.pack(pady=20)
+
+root.mainloop()
