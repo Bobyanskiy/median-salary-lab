@@ -1,0 +1,7 @@
+def export_chart(self):
+    from tkinter import filedialog
+    filename = filedialog.asksaveasfilename(defaultextension=".png", filetypes=[("PNG", "*.png"), ("SVG", "*.svg")])
+    if filename:
+        # Переиспользуем последний построенный график
+        plt.savefig(filename, dpi=150)
+        messagebox.showinfo("Успех", f"График сохранён")
