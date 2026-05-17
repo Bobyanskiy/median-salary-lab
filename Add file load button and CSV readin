@@ -1,0 +1,33 @@
+import tkinter as tk
+from tkinter import ttk, filedialog, messagebox
+import csv
+
+root = tk.Tk()
+root.title("Анализ данных - Лабораторная работа №3")
+root.geometry("900x600")
+
+def load_file():
+    filename = filedialog.askopenfilename(filetypes=[("CSV files", "*.csv")])
+    if filename:
+        try:
+            with open(filename, 'r', encoding='utf-8') as file:
+                reader = csv.DictReader(file)
+                for row in reader:
+                    table.insert("", tk.END, values=(row['year'], row['men_salary'], row['women_salary']))
+            messagebox.showinfo("Успех", "Файл загружен")
+        except Exception as e:
+            messagebox.showerror("Ошибка", str(e))
+
+btn_load = tk.Button(root, text="Загрузить CSV файл", command=load_file, bg="lightblue")
+btn_load.pack(pady=5)
+
+label = tk.Label(root, text="Данные о медианной зарплате", font=("Arial", 12))
+label.pack()
+
+table = ttk.Treeview(root, columns=("Год", "Мужчины", "Женщины"), show="headings")
+table.heading("Год", text="Год")
+table.heading("Мужчины", text="Зарплата мужчины (руб)")
+table.heading("Женщины", text="Зарплата женщины (руб)")
+table.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+
+root.mainloop()

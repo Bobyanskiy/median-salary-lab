@@ -1,0 +1,83 @@
+import tkinter as tk
+from tkinter import ttk, filedialog, messagebox
+import csv
+
+class SalaryAnalyzer:
+    """Главный класс приложения (принцип ООП - инкапсуляция)"""
+    
+    def __init__(self, root):
+        self.root = root
+        self.data = []
+        self.setup_ui()
+    
+    def setup_ui(self):
+        self.root.title("Анализ данных - Лабораторная работа №3")
+        self.root.geometry("900x650")
+        
+        btn_load = tk.Button(self.root, text="1. Загрузить CSV файл", command=self.load_file, bg="lightblue", width=25)
+        btn_load.pack(pady=5)
+        
+        btn_calc = tk.Button(self.root, text="2. Рассчитать проценты роста/падения", command=self.calculate_growth, bg="lightgreen", width=25)
+        btn_calc.pack(pady=5)
+        
+        label = tk.Label(self.root, text="Данные о медианной зарплате (2010-2024)", font=("Arial", 12))
+        label.pack()
+        
+        self.table = ttk.Treeview(self.root, columns=("Год", "Мужчины", "Женщины"), show="headings")
+        self.table.heading("Год", text="Год")
+        self.table.heading("Мужчины", text="Мужчины (руб)")
+        self.table.heading("Женщины", text="Женщины (руб)")
+        self.table.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+    
+    def load_file(self):
+        filename = filedialog.askopenfilename(filetypes=[("CSV files", "*.csv")])
+        if filename:
+            try:
+                for row in self.table.get_children():
+                    self.table.delete(row)
+                self.data = []
+                with open(filename, 'r', encoding='utf-8') as file:
+                    reader = csv.DictReader(file)
+                    for row in reader:
+                        year = int(row['year'])
+                        men = float(row['men_salary'])
+                        women = float(row['women_salary'])
+                        self.data.append((year, men, women))
+                        self.table.insert("", tk.END, values=(year, men, women))
+                messagebox.showinfo("Успех", f"Загружено {len(self.data)} записей")
+            except Exception as e:
+                messagebox.showerror("Ошибка", str(e))
+    
+    def calculate_growth(self):
+        if len(self.data) < 2:
+            messagebox.showwarning("Нет данных", "Сначала загрузите файл")
+            return
+        
+        max_growth_men = min_growth_men = 0
+        max_growth_women = min_growth_women = 0
+        year_max_men = year_min_men = year_max_women = year_min_women = 0
+        
+        for i in range(1, len(self.data)):
+            year, men_curr, women_curr = self.data[i]
+            _, men_prev, women_prev = self.data[i-1]
+            
+            growth_men = (men_curr - men_prev) / men_prev * 100
+            growth_women = (women_curr - women_prev) / women_prev * 100
+            
+            if growth_men > max_growth_men:
+                max_growth_men, year_max_men = growth_men, year
+            if growth_men < min_growth_men:
+                min_growth_men, year_min_men = growth_men, year
+            if growth_women > max_growth_women:
+                max_growth_women, year_max_women = growth_women, year
+            if growth_women < min_growth_women:
+                min_growth_women, year_min_women = growth_women, year
+        
+        result = f"Мужчины:\n  Макс. рост: {max_growth_men:.1f}% ({year_max_men} г.)\n  Мин. рост: {min_growth_men:.1f}% ({year_min_men} г.)\n\n"
+        result += f"Женщины:\n  Макс. рост: {max_growth_women:.1f}% ({year_max_women} г.)\n  Мин. рост: {min_growth_women:.1f}% ({year_min_women} г.)"
+        messagebox.showinfo("Результаты анализа", result)
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = SalaryAnalyzer(root)
+    root.mainloop()
