@@ -1,0 +1,40 @@
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+
+def make_forecast(self):
+    if len(self.data) < 2:
+        messagebox.showwarning("Нет данных", "Сначала загрузите файл")
+        return
+    
+    try:
+        n = int(self.n_entry.get())
+        k = int(self.k_entry.get())
+    except:
+        messagebox.showerror("Ошибка", "Введите числа в поля N и K")
+        return
+    
+    years = [d[0] for d in self.data]
+    men = [d[1] for d in self.data]
+    women = [d[2] for d in self.data]
+    
+    men_forecast = self.moving_average_forecast(men, n, k)
+    women_forecast = self.moving_average_forecast(women, n, k)
+    
+    forecast_years = [years[-1] + i + 1 for i in range(k)]
+    all_years = years + forecast_years
+    men_all = men + men_forecast
+    women_all = women + women_forecast
+    
+    fig, ax = plt.subplots(figsize=(10, 5))
+    ax.plot(years, men, 'b-o', label='Мужчины (факт)', linewidth=2)
+    ax.plot(years, women, 'r-o', label='Женщины (факт)', linewidth=2)
+    ax.plot(forecast_years, men_forecast, 'b--s', label='Мужчины (прогноз)', linewidth=2)
+    ax.plot(forecast_years, women_forecast, 'r--s', label='Женщины (прогноз)', linewidth=2)
+    
+    ax.set_xlabel('Год')
+    ax.set_ylabel('Зарплата (руб)')
+    ax.set_title(f'Прогноз медианной зарплаты (скользящая средняя, N={n})')
+    ax.legend()
+    ax.grid(True, alpha=0.3)
+    
+    plt.show()
