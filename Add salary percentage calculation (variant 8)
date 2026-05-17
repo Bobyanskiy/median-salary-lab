@@ -1,0 +1,82 @@
+import tkinter as tk
+from tkinter import ttk, filedialog, messagebox
+import csv
+
+root = tk.Tk()
+root.title("Анализ данных - Лабораторная работа №3")
+root.geometry("900x650")
+
+data = []
+
+def load_file():
+    global data
+    filename = filedialog.askopenfilename(filetypes=[("CSV files", "*.csv")])
+    if filename:
+        try:
+            for row in table.get_children():
+                table.delete(row)
+            data = []
+            with open(filename, 'r', encoding='utf-8') as file:
+                reader = csv.DictReader(file)
+                for row in reader:
+                    year = int(row['year'])
+                    men = float(row['men_salary'])
+                    women = float(row['women_salary'])
+                    data.append((year, men, women))
+                    table.insert("", tk.END, values=(year, men, women))
+            messagebox.showinfo("Успех", f"Загружено {len(data)} записей")
+        except Exception as e:
+            messagebox.showerror("Ошибка", str(e))
+
+def calculate_growth():
+    if len(data) < 2:
+        messagebox.showwarning("Нет данных", "Сначала загрузите файл")
+        return
+    
+    max_growth_men = 0
+    min_growth_men = 0
+    max_growth_women = 0
+    min_growth_women = 0
+    year_max_men = year_min_men = year_max_women = year_min_women = 0
+    
+    for i in range(1, len(data)):
+        year, men_curr, women_curr = data[i]
+        _, men_prev, women_prev = data[i-1]
+        
+        growth_men = (men_curr - men_prev) / men_prev * 100
+        growth_women = (women_curr - women_prev) / women_prev * 100
+        
+        if growth_men > max_growth_men:
+            max_growth_men = growth_men
+            year_max_men = year
+        if growth_men < min_growth_men:
+            min_growth_men = growth_men
+            year_min_men = year
+        if growth_women > max_growth_women:
+            max_growth_women = growth_women
+            year_max_women = year
+        if growth_women < min_growth_women:
+            min_growth_women = growth_women
+            year_min_women = year
+    
+    result = f"Мужчины:\n  Макс. рост: {max_growth_men:.1f}% ({year_max_men} г.)\n  Мин. рост: {min_growth_men:.1f}% ({year_min_men} г.)\n\n"
+    result += f"Женщины:\n  Макс. рост: {max_growth_women:.1f}% ({year_max_women} г.)\n  Мин. рост: {min_growth_women:.1f}% ({year_min_women} г.)"
+    
+    messagebox.showinfo("Результаты анализа", result)
+
+btn_load = tk.Button(root, text="1. Загрузить CSV файл", command=load_file, bg="lightblue", width=25)
+btn_load.pack(pady=5)
+
+btn_calc = tk.Button(root, text="2. Рассчитать проценты роста/падения", command=calculate_growth, bg="lightgreen", width=25)
+btn_calc.pack(pady=5)
+
+label = tk.Label(root, text="Данные о медианной зарплате (2010-2024)", font=("Arial", 12))
+label.pack()
+
+table = ttk.Treeview(root, columns=("Год", "Мужчины", "Женщины"), show="headings")
+table.heading("Год", text="Год")
+table.heading("Мужчины", text="Мужчины (руб)")
+table.heading("Женщины", text="Женщины (руб)")
+table.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+
+root.mainloop()
