@@ -1,1 +1,37 @@
-
+    def plot_data(self):
+        """Построение графика по загруженным данным"""
+        if not self.data:
+            return
+        
+        # Очищаем область графика
+        for widget in self.fig_frame.winfo_children():
+            widget.destroy()
+        
+        # Подготовка данных
+        years = [d[0] for d in self.data]
+        men = [d[1] for d in self.data]
+        women = [d[2] for d in self.data]
+        
+        # Создание графика
+        self.current_fig, ax = plt.subplots(figsize=(10, 5))
+        
+        # Рисуем линии
+        ax.plot(years, men, 'b-o', label='Мужчины', linewidth=2, markersize=6)
+        ax.plot(years, women, 'r-o', label='Женщины', linewidth=2, markersize=6)
+        
+        # Настройки
+        ax.set_xlabel('Год', fontsize=12)
+        ax.set_ylabel('Зарплата (руб)', fontsize=12)
+        ax.set_title('Медианная зарплата в России', fontsize=14)
+        ax.legend()
+        ax.grid(True, alpha=0.3)
+        
+        # Встраиваем график в окно
+        canvas = FigureCanvasTkAgg(self.current_fig, self.fig_frame)
+        canvas.draw()
+        canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        
+        # Панель инструментов для масштабирования
+        toolbar = NavigationToolbar2Tk(canvas, self.fig_frame)
+        toolbar.update()
+        canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
